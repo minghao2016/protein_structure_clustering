@@ -36,7 +36,7 @@ def evaluate(indv):
 
 # two weights - ari (most important) and silhouette, add labels?
 toolbox = base.Toolbox()
-creator.create("FitnessMax", base.Fitness, weights=(1.0,)
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 toolbox.register('expr', generateIndividual)
 toolbox.register('individual', tools.initIterate, creator.Individual, toolbox.expr)
@@ -61,6 +61,7 @@ def main():
 
     # Statistics
     stats = tools.Statistics(key=lambda ind: ind.fitness.values)
+    
     stats.register("std", np.std)
     stats.register("min", np.min)
     stats.register("avg", np.mean)
@@ -68,6 +69,12 @@ def main():
 
     # Run GA
     population, logbook = algorithms.eaSimple(population, toolbox, CXPB, MUTPB, NGEN, stats=stats)
+
+    hall = tools.ParetoFront()
+    
+    print(hall)
+
+
 
     # Write logs to file
 
