@@ -12,16 +12,16 @@ from deap import tools
 # PROTEIN CLUSTERING
 import ClusteringEvaluation as ce
 import KMedoids as km
-import LoadData as ld
 import MatrixFunctions as mf
+import ReadSimilarities as rs
 import UtilitiesSCOP as scop
 from sklearn import metrics
 from sklearn.cluster import AgglomerativeClustering
 
-
+#'a.1','a.3','b.2','b.3'
 samples = ['a.1','a.3','b.2','b.3']
 
-clustering = ['complete','average','kmedoids']
+clustering = ['complete','average']
 
 combinations = [('rmsd','gdt_2'),('rmsd','gdt_4'),
                 ('rmsd','maxsub'),('rmsd','tm'),
@@ -46,16 +46,16 @@ for measures in combinations:
             sample_for_domains = spl
             sample = spl+'.'  
             path_to_results = 'C:/ShareSSD/scop/genetic_results_pair/gen_'+alg+'_'+sample+'_'+measure1+'_'+measure2       
-            matrix1 = ld.loadMatrixFromFile(sample, measure1)
-            matrix2 = ld.loadMatrixFromFile(sample, measure2)
-            matrix3 = ld.loadMatrixFromFile(sample, measure3)
+            matrix1 = rs.loadMatrixFromFile(sample, measure1)
+            matrix2 = rs.loadMatrixFromFile(sample, measure2)
+            matrix3 = rs.loadMatrixFromFile(sample, measure3)
             matrix1 = mf.minMaxScale(matrix1)
             matrix2 = mf.minMaxScale(matrix2)
             matrix3 = mf.minMaxScale(matrix3)
             matrix1 = mf.calculateDistances(matrix1)
             matrix2 = mf.calculateDistances(matrix2)
             matrix3 = mf.calculateDistances(matrix3)
-            domains = ld.loadDomainListFromFile(sample_for_domains)
+            domains = rs.loadDomainListFromFile(sample_for_domains)
             n_labels = scop.getUniqueClassifications(sample_for_domains)
             ground_truth = scop.getDomainLabels(domains)
 
@@ -65,23 +65,26 @@ for measures in combinations:
             writer.write('Gen: '+str(current_generation)+'\n')
 
             #####################################################
-            # GENERATE INDIVIDUALS
+            # GENETIC ALGORITHM
             #####################################################
-            def generateIndividual():
-                w1 = round(random.uniform(0,1),2)
-                w2 = round(random.uniform(0,1-w1),2)
-                w3 = round(1-w2-w1,2)
-                return [w1,w2,w3]
 
-            #####################################################
-            # FITNESS
-            #####################################################
+            IND_SIZE = 3  
+            toolbox = base.Toolbox()
+            creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+            creator.create("Individual", list, fitness=creator.FitnessMax)
+            toolbox.register("attr_bool", random.uniform, 0, 1)
+            toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n=IND_SIZE)
+            toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
             def evaluate(individual):
 
                 indv = [round(x,2) for x in individual]
                 w1 = indv[0]
                 w2 = indv[1]
                 w3 = indv[2]
+
+                w2 = 1 - w1
+                w3 = 0
 
                 corr = mf.calculateCorrelationMatrix(matrix1, matrix2, matrix3, w1, w2, w3)
                 if algorithm == 'complete':      
@@ -107,23 +110,16 @@ for measures in combinations:
                 writer.write(str(current_individual)+': '+str(w1)+' '+str(w2)+' '+str(w3)+' '+' '.join(str(m) for m in metrics)+'\n')
                 current_individual += 1
                 print(current_individual)
-
+                #mtr = [round(m,2) for m in metrics]
                 return float(metrics[4]),
 
-            #####################################################
-            # REGISTER COMPONENTS
-            #####################################################
-            IND_SIZE = 3  
-            toolbox = base.Toolbox()
-            creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-            creator.create("Individual", list, fitness=creator.FitnessMax)
-            toolbox.register('expr', generateIndividual)
-            toolbox.register('individual', tools.initIterate, creator.Individual, toolbox.expr)
-            toolbox.register('population', tools.initRepeat, list, toolbox.individual)
             toolbox.register("evaluate", evaluate)
             toolbox.register("mate", tools.cxTwoPoint)
             toolbox.register("mutate", tools.mutFlipBit, indpb=0.2)
             toolbox.register("select", tools.selTournament, tournsize=40)
+            #toolbox.register("select", tools.selBest)
+            #toolbox.register("select", tools.selBest)
+            
 
             def main():
                 random.seed(94)
@@ -141,6 +137,7 @@ for measures in combinations:
                 
                 # STATISTICS
                 stats = tools.Statistics(key=lambda ind: ind.fitness.values)
+                #stats.register("std", np.std)
                 stats.register("min", np.min)
                 stats.register("avg", np.mean)
                 stats.register("max", np.max)

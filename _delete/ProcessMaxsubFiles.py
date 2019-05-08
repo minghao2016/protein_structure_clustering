@@ -2,87 +2,10 @@
 
 import MatrixFunctions as mf
 import numpy as np
-import os
 
-def readSimilaritiesToMatrix(sample, measure):
-    
-    path_to_matrix = 'C:/ShareSSD/scop/data/values_'+sample+'_'+measure
-    path_to_domains = 'C:/ShareSSD/scop/data/domains_'+sample
-
-    counter = 0
-    matrix = []
-    row = []
-
-    with open(path_to_matrix, 'r') as fp:
-
-        domains = set()
-
-        line = fp.readline()
-        while line:
-
-            if 'END' in line:
-                break
-
-            parsed = str(line).strip().split(' ')
-            structure1 = parsed[0]
-            structure2 = parsed[1]
-            value = float(parsed[2])
-
-            domains.add(structure1)
-            domains.add(structure2)
-
-            # add the respective amount of zeroes to the current row
-            counter += 1
-            i = 0
-            while i < counter:
-                row.append(0)
-                i += 1
-            i = 0
-
-            # track the current structure and read its alignments
-            current_row = parsed[0]
-            while current_row == parsed[0] and line:
-                row.append(value)
-                line = fp.readline()
-                if 'END' in line:
-                    break
-                parsed = str(line).strip().split(' ')
-                print(parsed)
-                value = float(parsed[2])
-
-            matrix.append(row)
-            row = []
-
-        line = fp.readline()
-
-    counter += 1
-
-    i = 0
-    while i < counter:
-        row.append(0)
-        i += 1
-    i = 0
-    matrix.append(row)
-
-    matrix = np.asmatrix(matrix)
-
-    # symmetrize and write results to file
-    matrix = mf.symmetrizeMatrix(matrix)
-    matrix = np.matrix(matrix)
-    matrix.dump("C:/ShareSSD/scop/data/matrix_"+sample+'_'+measure)
-
-    # write domain list to file
-    if not os.path.isfile(path_to_domains):
-        with open(path_to_domains, 'w') as nf:
-            domains = list(domains)
-            for domain in domains:
-                nf.write(domain+'\n')
-            nf.write('END')
-
-# Use this to read MaxSub and TM-score files
 def readDistancesMaxsub(sample, measure):
-    path_to_matrix = 'C:/ShareSSD/scop/data/sim_'+sample+'_'+measure
-    path_to_values = 'C:/ShareSSD/scop/data/values_'+sample+'_'+measure
+    path_to_matrix = 'C:/ShareSSD/scop/tests/sim_'+sample+'_'+measure
+    path_to_values = 'C:/ShareSSD/scop/tests/values_'+sample+'_'+measure
 
     counter = 0
     matrix = []
@@ -109,6 +32,8 @@ def readDistancesMaxsub(sample, measure):
             if 'MS :' in str(line): 
                 if '#' not in str(line):
 
+                    
+
                     parsed = str(line).strip().split()
                     current_row = parsed[2]
                     value = float(parsed[4])
@@ -118,14 +43,18 @@ def readDistancesMaxsub(sample, measure):
                         row.append(value)
                         line = fp.readline()
                         parsed = str(line).strip().split()
+
                         # value is the average between the two
                         value = (float(parsed[4])+float(parsed[5]))/2
 
                     counter += 1
+
                     matrix.append(row)
+
                     row = []    
 
                     #REVER ORDEM DAS OPERACOES
+
                     i = 0
                     while i < counter:
                         row.append(0)
@@ -135,6 +64,7 @@ def readDistancesMaxsub(sample, measure):
 
             line = fp.readline()
 
+    
     row = []
     i = 0
     while i < counter:
@@ -160,7 +90,6 @@ def readDistancesMaxsub(sample, measure):
 
     print(matrix)
 
-    # write values to be used in kernel density estimation
     with open(path_to_values, 'w') as nf:
         for i in range(0,n):
             for j in range(0,m):
@@ -168,10 +97,9 @@ def readDistancesMaxsub(sample, measure):
 
     matrix.dump('C:/ShareSSD/scop/tests/matrix_'+sample+'_'+measure)
 
-# Use this to read RMSD and GDT files
 def readDistances(sample, measure):
     path_to_matrix = 'C:/ShareSSD/scop/data/sim_'+sample+'_'+measure
-    path_to_values = 'C:/ShareSSD/scop/data/values_'+sample+'_'+measure
+    path_to_values = 'C:/ShareSSD/scop/values_'+sample+'_'+measure
 
     counter = 0
     matrix = []
@@ -243,5 +171,5 @@ def readDistances(sample, measure):
             for j in range(0,m):
                 nf.write(str(matrix[i,j])+'\n')
 
-    matrix.dump('C:/ShareSSD/scop/data/matrix_'+sample+'_'+measure)
+    matrix.dump('C:/ShareSSD/scop/matrix_'+sample+'_'+measure)
     return domains, matrix
