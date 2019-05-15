@@ -1,8 +1,8 @@
 
 import ClusteringEvaluation as ce
 import KMedoids as km
+import LoadData as ld
 import MatrixFunctions as mf
-import ReadSimilarities as rs
 import UtilitiesSCOP as scop
 import numpy as np
 
@@ -23,11 +23,11 @@ for m in measures:
             sample_for_domains = spl
             sample = str(spl)+'.'
             
-            matrix1 = rs.loadMatrixFromFile(sample, measure1)
+            matrix1 = ld.loadMatrixFromFile(sample, measure1)
             matrix1 = mf.minMaxScale(matrix1)
             matrix1 = mf.calculateDistances(matrix1)
 
-            domains = rs.loadDomainListFromFile(sample)
+            domains = ld.loadDomainListFromFile(sample)
 
             n_labels = scop.getUniqueClassifications(sample_for_domains)
 
