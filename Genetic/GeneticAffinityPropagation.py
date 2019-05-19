@@ -41,7 +41,7 @@ for measures in combinations:
         measure3 = 'seq'
         sample_for_domains = spl
         sample = spl+'.'    
-        path_to_results = 'C:/ShareSSD/scop/genetic_afp/genafp_'+sample+'_'+measure1+'_'+measure2        
+        path_to_results = 'C:/ShareSSD/scop/genetic_results_afp/genafp_'+sample+'_'+measure1+'_'+measure2        
         matrix1 = ld.loadMatrixFromFile(sample, measure1)
         matrix2 = ld.loadMatrixFromFile(sample, measure2)
         matrix3 = ld.loadMatrixFromFile(sample, measure3)
@@ -68,7 +68,7 @@ for measures in combinations:
             w2 = round(random.uniform(0,1-w1),2)
             w3 = round(1-w2-w1,2)
             w4 = random.randint(-1000,500)
-            w5 = round(random.uniform(0.5,1),1)
+            w5 = round(random.uniform(0.5,0.9),1)
             return [w1,w2,w3,w4,w5]
 
         #####################################################
@@ -91,8 +91,22 @@ for measures in combinations:
             if len(set(labels)) != n_labels:
                 return -1,-1,
 
-            #return ari and silhouette 
             metrics = ce.clusterEvaluationNoLabels(corr, labels)
+
+            global current_individual  
+            global current_generation  
+            global POPSIZE
+            
+            if current_individual == POPSIZE:
+                current_individual = 0
+                current_generation += 1
+                writer.write('Gen: '+str(current_generation)+'\n')
+
+            writer.write(str(current_individual)+': '+str(w1)+' '+str(w2)+' '+str(w3)+' '+' '.join(str(m) for m in metrics)+'\n')
+            current_individual += 1
+            print(current_individual)
+
+            #return ari and silhouette 
             return float(metrics[4]), float((metrics[6])),
 
         #####################################################
@@ -104,7 +118,7 @@ for measures in combinations:
         # two weights - ari (most important) and silhouette 
         creator.create("FitnessMax", base.Fitness, weights=(1.0, 0.9))
         creator.create("Individual", list, fitness=creator.FitnessMax)
-        toolbox.register('expr', generateIndividual)
+        toolbox.register('expr', generateIndividualAfp)
         toolbox.register('individual', tools.initIterate, creator.Individual, toolbox.expr)
         toolbox.register('population', tools.initRepeat, list, toolbox.individual)
         # add the cluster number restriction
