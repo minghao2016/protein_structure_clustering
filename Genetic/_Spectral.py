@@ -31,9 +31,9 @@ sc = SpectralClustering(n_clusters=n_labels, affinity='rbf', assign_labels="disc
 metrics = ce.clusterEvaluation(matrix, sc.labels_, ground_truth)
 print(metrics)
 
-#mf.calculateDistances(matrix)
+matrix = mf.calculateDistances(matrix)
 sc = SpectralClustering(n_clusters=n_labels, affinity='rbf', assign_labels="discretize", random_state=100).fit(matrix)
-metrics = ce.clusterEvaluationNoLabels(matrix, sc.labels_)
+metrics = ce.clusterEvaluation(matrix, sc.labels_, ground_truth)
 print(metrics)
 
 sc = SpectralClustering(n_clusters=n_labels, affinity='nearest_neighbors', assign_labels="discretize", random_state=100).fit(matrix)

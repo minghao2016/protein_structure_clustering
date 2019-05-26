@@ -28,7 +28,7 @@ combinations = [('rmsd','gdt_2'),('rmsd','gdt_4'),
                 ('gdt_4','tm'), ('maxsub','tm')]
 
 NGENERATIONS = 30
-POPSIZE = 100
+POPSIZE = 200
 
 for measures in combinations:
     for spl in samples:
@@ -87,7 +87,7 @@ for measures in combinations:
 
             af = AffinityPropagation(preference=w4, damping=w5).fit(corr)
             labels = af.labels_
-
+            
             if len(set(labels)) != n_labels:
                 return -1,-1,
 
