@@ -7,7 +7,6 @@ import MatrixFunctions as mf
 import UtilitiesSCOP as scop
 import LoadData as ld
 import numpy as np
-from sklearn.mixture import GMM
 from sklearn.mixture import GaussianMixture
 domains = ld.loadDomainListFromFile('a.3.')
 
