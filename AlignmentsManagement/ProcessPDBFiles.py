@@ -1,6 +1,8 @@
 
 import os
 
+# remove all non CA atoms
+
 path = 'C:/ShareSSD/scop/structures/'
 path2 = 'C:/ShareSSD/scop/structures_new/'
 
